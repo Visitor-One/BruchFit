@@ -61,6 +61,13 @@ button{user-select:none;-webkit-user-select:none;touch-action:manipulation;curso
 .answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
 .answer{min-height:72px;border:none;border-radius:18px;background:rgba(255,255,255,.065);color:white;font-weight:900;font-size:22px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);padding:12px}
 .answer:active,.visualChoice:active{transform:scale(.985)}
+.answer.wrongChoice,.visualChoice.wrongChoice{
+  background:rgba(255,107,107,.13);
+  box-shadow:inset 0 0 0 2px rgba(255,107,107,.55);
+  color:#ffaaaa;
+  opacity:.72;
+}
+.answer.wrongChoice:disabled,.visualChoice.wrongChoice:disabled{cursor:default}
 .feedback{min-height:56px;margin-top:12px;border-radius:16px;padding:12px 14px;font-weight:850;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .feedback.good{background:rgba(88,214,141,.15);color:#91efb6}.feedback.bad{background:rgba(255,107,107,.15);color:#ff9d9d}
 .next{border:none;border-radius:13px;padding:10px 14px;background:white;color:#111827;font-weight:900}
@@ -137,7 +144,7 @@ clip-path:inherit;box-shadow:inset -7px -10px 12px rgba(100,55,20,.26)}
 </head>
 <body>
 <div class="app">
- <div class="topbar"><div class="brand">BruchFit</div><div class="badge">Version 6.0</div></div>
+ <div class="topbar"><div class="brand">BruchFit</div><div class="badge">Version 7.0</div></div>
 
  <section id="startScreen" class="card start">
   <div class="hero">
@@ -220,12 +227,27 @@ function finish(){
  $('bigScore').textContent=score;$('correctStat').textContent=correct;$('wrongStat').textContent=wrong;
  $('percentStat').textContent=Math.round(correct/TOTAL*100)+'%';
 }
-function done(ok,msg){
- if(locked)return;locked=true;
- if(ok){score+=10;correct++}else wrong++;
+function done(ok,msg,source){
+ if(locked)return;
+
+ if(!ok){
+   wrong++;
+   $('score').textContent=`⭐ ${score}`;
+   if(source){
+     source.classList.add('wrongChoice');
+     source.disabled=true;
+   }
+   feedback.className='feedback bad';
+   feedback.innerHTML='<span>✗ Nicht ganz. Versuch es noch einmal.</span>';
+   return;
+ }
+
+ locked=true;
+ score+=10;
+ correct++;
  $('score').textContent=`⭐ ${score}`;
- feedback.className='feedback '+(ok?'good':'bad');
- feedback.innerHTML=`<span>${ok?'✓ Richtig!':'✗ Nicht ganz.'} ${msg||''}</span><button class="next">Weiter</button>`;
+ feedback.className='feedback good';
+ feedback.innerHTML=`<span>✓ Richtig! ${msg||''}</span><button class="next">Weiter</button>`;
  feedback.querySelector('.next').onclick=()=>{idx++;nextTask()}
 }
 function taskRecognize(){
@@ -245,7 +267,7 @@ function recognizeVisualToFraction(){
   const s=simp(nn,dd);
   if(!opts.some(o=>o.n===s[0]&&o.d===s[1]) && s[0]/s[1]!==correctS[0]/correctS[1]) opts.push({n:s[0],d:s[1],ok:false});
  }
- opts.sort(()=>Math.random()-.5).forEach(o=>{const b=document.createElement('button');b.className='answer';b.innerHTML=frac(o.n,o.d);b.onclick=()=>done(o.ok,`Dargestellt waren ${n} von ${d} Teilen.`);answers.appendChild(b)})
+ opts.sort(()=>Math.random()-.5).forEach(o=>{const b=document.createElement('button');b.className='answer';b.innerHTML=frac(o.n,o.d);b.onclick=()=>done(o.ok,`Dargestellt waren ${n} von ${d} Teilen.`,b);answers.appendChild(b)})
 }
 function recognizeFractionToVisual(){
  const d=pick([3,4,5,6,8]),n=rand(1,d-1);
@@ -256,7 +278,7 @@ function recognizeFractionToVisual(){
    if(!opts.some(o=>o.n===nn&&o.d===dd) && nn/dd!==n/d) opts.push({n:nn,d:dd,ok:false});
  }
  const wrap=document.createElement('div');wrap.className='choiceVisuals';
- opts.sort(()=>Math.random()-.5).forEach(o=>{const b=document.createElement('button');b.className='visualChoice';b.innerHTML=barHTML(o.n,o.d);b.onclick=()=>done(o.ok,`Gesucht war ${n}/${d}.`);wrap.appendChild(b)});
+ opts.sort(()=>Math.random()-.5).forEach(o=>{const b=document.createElement('button');b.className='visualChoice';b.innerHTML=barHTML(o.n,o.d);b.onclick=()=>done(o.ok,`Gesucht war ${n}/${d}.`,b);wrap.appendChild(b)});
  stage.appendChild(wrap)
 }
 function recognizeImproper(){
@@ -331,7 +353,7 @@ function recognizeImproper(){
    const b=document.createElement('button');
    b.className='answer';
    b.innerHTML=frac(o.n,o.d);
-   b.onclick=()=>done(o.ok,'');
+   b.onclick=()=>done(o.ok,'',b);
    answers.appendChild(b);
  });
 }
@@ -475,7 +497,7 @@ function taskCalc(){
    const z=simp(nn,dd);
    if(!opts.some(o=>o.n===z[0]&&o.d===z[1]) && z[0]/z[1]!==s[0]/s[1])opts.push({n:z[0],d:z[1],ok:false})
  }
- opts.sort(()=>Math.random()-.5).forEach(o=>{const bt=document.createElement('button');bt.className='answer';bt.innerHTML=frac(o.n,o.d);bt.onclick=()=>done(o.ok,b===d?`Ergebnis: ${s[0]}/${s[1]}.`:`Gemeinsamer Nenner ${lcm(b,d)}. Ergebnis: ${s[0]}/${s[1]}.`);answers.appendChild(bt)})
+ opts.sort(()=>Math.random()-.5).forEach(o=>{const bt=document.createElement('button');bt.className='answer';bt.innerHTML=frac(o.n,o.d);bt.onclick=()=>done(o.ok,b===d?`Ergebnis: ${s[0]}/${s[1]}.`:`Gemeinsamer Nenner ${lcm(b,d)}. Ergebnis: ${s[0]}/${s[1]}.`,bt);answers.appendChild(bt)})
 }
 function barHTML(n,d){let p='';for(let i=0;i<d;i++)p+=`<div class="barPart ${i<n?'filled':''}"></div>`;return `<div class="bar">${p}</div>`}
 function smallPieHTML(n,d){const step=360/d,fill=360*n/d;return `<div class="smallPie" style="--step:${step}deg;--fill:${fill}deg"></div>`}
