@@ -72,12 +72,18 @@ button{user-select:none;-webkit-user-select:none;touch-action:manipulation;curso
 .block.selected{background:linear-gradient(145deg,#46d8ff,#078fe0);transform:translateY(-5px);box-shadow:inset 8px 8px 12px rgba(255,255,255,.22),inset -9px -9px 15px rgba(0,0,0,.12),0 0 0 4px rgba(79,222,255,.18),0 12px 20px rgba(24,173,231,.35)}
 
 .confirm{margin-top:16px;min-width:180px}
-.denBuilder{width:100%;max-width:620px;display:grid;gap:18px;justify-items:center}
+.denBuilder{width:100%;max-width:720px;display:grid;gap:22px;justify-items:center}
 .denTitle{font-size:16px;color:var(--muted);font-weight:800;text-align:center}
-.denControls{display:flex;align-items:center;justify-content:center;gap:14px}
-.denBtn{width:64px;height:64px;border:none;border-radius:18px;background:rgba(255,255,255,.08);color:white;font-size:34px;font-weight:900;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-.denValue{min-width:110px;height:74px;border-radius:20px;background:linear-gradient(180deg,#23344a,#182537);display:grid;place-items:center;font-size:38px;font-weight:950;box-shadow:inset 0 0 0 2px rgba(66,191,245,.32),0 10px 20px rgba(0,0,0,.18)}
-.denHint{font-size:14px;color:var(--muted);text-align:center;line-height:1.4}
+.sliderArea{width:min(560px,90%);display:grid;gap:10px}
+.denSlider{width:100%;height:44px;appearance:none;-webkit-appearance:none;background:transparent;touch-action:pan-y}
+.denSlider::-webkit-slider-runnable-track{height:10px;border-radius:999px;background:linear-gradient(90deg,#304257,#243246);box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
+.denSlider::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;border-radius:50%;margin-top:-12px;background:linear-gradient(145deg,#f7fbff,#b9c7d5);border:4px solid #213247;box-shadow:0 5px 12px rgba(0,0,0,.32)}
+.denSlider::-moz-range-track{height:10px;border-radius:999px;background:#2b3a4e}
+.denSlider::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:#edf5fb;border:4px solid #213247}
+.sliderScale{display:flex;justify-content:space-between;color:#718398;font-size:12px;padding:0 4px}
+.previewBlocks{min-height:90px;display:flex;flex-wrap:wrap;gap:11px;justify-content:center;align-items:center;width:100%}
+.previewBlock{width:66px;height:66px;border-radius:15px;background:linear-gradient(145deg,#41556c,#2c3a4c);box-shadow:inset 7px 7px 10px rgba(255,255,255,.07),inset -8px -8px 13px rgba(0,0,0,.19),0 8px 13px rgba(0,0,0,.15);position:relative}
+.previewBlock:after{content:"";position:absolute;inset:8px;border-radius:10px;border:2px solid rgba(255,255,255,.11)}
 .blockTaskWrap{display:grid;gap:18px;justify-items:center;width:100%}
 .blockCounter{font-size:15px;color:var(--muted);font-weight:800;text-align:center}
 .blockCounter strong{color:var(--accent);font-size:20px}
@@ -127,7 +133,7 @@ clip-path:inherit;box-shadow:inset -7px -10px 12px rgba(100,55,20,.26)}
 </head>
 <body>
 <div class="app">
- <div class="topbar"><div class="brand">BruchFit</div><div class="badge">Version 3.0</div></div>
+ <div class="topbar"><div class="brand">BruchFit</div><div class="badge">Version 4.0</div></div>
 
  <section id="startScreen" class="card start">
   <div class="hero">
@@ -261,7 +267,7 @@ function taskBuild(){
  $('eyebrow').textContent='Bruch darstellen';promptEl.innerHTML=`Stelle ${frac(n,d)} dar.`;
 
  if(type==='blocks'){
-   subEl.textContent='1. Stelle zuerst den Nenner ein. 2. Markiere danach den Zähler.';
+   subEl.textContent='Baue den Bruch aus gleich großen Teilen auf.';
    buildBlocksInteractive(n,d);
  }else{
    subEl.textContent=`Wähle ${n} von ${d} deutlich getrennten Pizzastücken.`;
@@ -280,37 +286,47 @@ function buildBlocksInteractive(n,d){
 
  const title=document.createElement('div');
  title.className='denTitle';
- title.textContent='Wie viele gleich große Teile hat das Ganze?';
+ title.textContent='Lege die Anzahl der Blöcke fest.';
 
- const controls=document.createElement('div');
- controls.className='denControls';
+ const sliderArea=document.createElement('div');
+ sliderArea.className='sliderArea';
 
- const minus=document.createElement('button');
- minus.className='denBtn';
- minus.textContent='−';
+ const slider=document.createElement('input');
+ slider.type='range';
+ slider.min='2';
+ slider.max='10';
+ slider.step='1';
+ slider.value=String(chosenDen);
+ slider.className='denSlider';
+ slider.setAttribute('aria-label','Anzahl der Blöcke');
 
- const value=document.createElement('div');
- value.className='denValue';
- value.textContent=chosenDen;
+ const scale=document.createElement('div');
+ scale.className='sliderScale';
+ scale.innerHTML='<span>2</span><span>4</span><span>6</span><span>8</span><span>10</span>';
 
- const plus=document.createElement('button');
- plus.className='denBtn';
- plus.textContent='+';
+ sliderArea.append(slider,scale);
 
- const hint=document.createElement('div');
- hint.className='denHint';
- hint.textContent='Diese Zahl ist der Nenner. Erzeuge danach genau so viele Blöcke.';
+ const preview=document.createElement('div');
+ preview.className='previewBlocks';
 
  const create=document.createElement('button');
  create.className='primary confirm';
- create.textContent='Blöcke erstellen';
+ create.textContent='Übernehmen';
 
- const update=()=>value.textContent=chosenDen;
- minus.onclick=()=>{if(chosenDen>2){chosenDen--;update()}};
- plus.onclick=()=>{if(chosenDen<10){chosenDen++;update()}};
+ function renderPreview(){
+   chosenDen=Number(slider.value);
+   preview.innerHTML='';
+   for(let i=0;i<chosenDen;i++){
+     const b=document.createElement('div');
+     b.className='previewBlock';
+     preview.appendChild(b);
+   }
+ }
 
- controls.append(minus,value,plus);
- wrap.append(title,controls,hint,create);
+ slider.addEventListener('input',renderPreview);
+ renderPreview();
+
+ wrap.append(title,preview,sliderArea,create);
  stage.appendChild(wrap);
 
  create.onclick=()=>{
@@ -318,7 +334,7 @@ function buildBlocksInteractive(n,d){
 
    if(chosenDen!==d){
      feedback.className='feedback bad';
-     feedback.innerHTML=`<span>✗ Der Nenner von ${n}/${d} ist ${d}. Stelle also ${d} Blöcke ein.</span>`;
+     feedback.innerHTML='<span>✗ Die Aufteilung passt noch nicht zum gesuchten Bruch.</span>';
      return;
    }
 
@@ -330,21 +346,17 @@ function buildBlocksInteractive(n,d){
    const taskWrap=document.createElement('div');
    taskWrap.className='blockTaskWrap';
 
-   const counter=document.createElement('div');
-   counter.className='blockCounter';
-   counter.innerHTML=`Nenner richtig: <strong>${d}</strong> Blöcke. Markiere jetzt den Zähler <strong>${n}</strong>.`;
-
    const row=document.createElement('div');
    row.className='blockRow';
 
    for(let i=0;i<d;i++){
      const b=document.createElement('button');
      b.className='block';
+     b.setAttribute('aria-label',`Block ${i+1}`);
      b.onclick=()=>{
        if(locked)return;
        selected.has(i)?selected.delete(i):selected.add(i);
        b.classList.toggle('selected',selected.has(i));
-       counter.innerHTML=`Nenner: <strong>${d}</strong> &nbsp; • &nbsp; markiert: <strong>${selected.size}</strong> / gesucht: <strong>${n}</strong>`;
      };
      row.appendChild(b);
    }
@@ -352,9 +364,8 @@ function buildBlocksInteractive(n,d){
    const check=document.createElement('button');
    check.className='primary confirm';
    check.textContent='Prüfen';
-   check.onclick=()=>done(selected.size===n,`Richtig: Nenner ${d}, Zähler ${n}.`);
-
-   taskWrap.append(counter,row,check);
+   check.onclick=()=>done(selected.size===n,'');
+   taskWrap.append(row,check);
    stage.appendChild(taskWrap);
  };
 }
