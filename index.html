@@ -70,7 +70,18 @@ button{user-select:none;-webkit-user-select:none;touch-action:manipulation;curso
 .block{width:78px;height:78px;border:none;border-radius:17px;background:linear-gradient(145deg,#41556c,#2c3a4c);box-shadow:inset 8px 8px 12px rgba(255,255,255,.08),inset -9px -9px 15px rgba(0,0,0,.2),0 9px 14px rgba(0,0,0,.16);position:relative}
 .block:after{content:"";position:absolute;inset:9px;border-radius:11px;border:2px solid rgba(255,255,255,.13)}
 .block.selected{background:linear-gradient(145deg,#46d8ff,#078fe0);transform:translateY(-5px);box-shadow:inset 8px 8px 12px rgba(255,255,255,.22),inset -9px -9px 15px rgba(0,0,0,.12),0 0 0 4px rgba(79,222,255,.18),0 12px 20px rgba(24,173,231,.35)}
+
 .confirm{margin-top:16px;min-width:180px}
+.denBuilder{width:100%;max-width:620px;display:grid;gap:18px;justify-items:center}
+.denTitle{font-size:16px;color:var(--muted);font-weight:800;text-align:center}
+.denControls{display:flex;align-items:center;justify-content:center;gap:14px}
+.denBtn{width:64px;height:64px;border:none;border-radius:18px;background:rgba(255,255,255,.08);color:white;font-size:34px;font-weight:900;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.denValue{min-width:110px;height:74px;border-radius:20px;background:linear-gradient(180deg,#23344a,#182537);display:grid;place-items:center;font-size:38px;font-weight:950;box-shadow:inset 0 0 0 2px rgba(66,191,245,.32),0 10px 20px rgba(0,0,0,.18)}
+.denHint{font-size:14px;color:var(--muted);text-align:center;line-height:1.4}
+.blockTaskWrap{display:grid;gap:18px;justify-items:center;width:100%}
+.blockCounter{font-size:15px;color:var(--muted);font-weight:800;text-align:center}
+.blockCounter strong{color:var(--accent);font-size:20px}
+
 .equation{display:flex;gap:12px;align-items:center;justify-content:center;font-size:clamp(34px,8vw,60px);font-weight:950;flex-wrap:wrap}
 .choiceVisuals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%;max-width:660px}
 .visualChoice{border:none;border-radius:22px;background:rgba(255,255,255,.055);padding:16px;color:white;min-height:170px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
@@ -116,7 +127,7 @@ clip-path:inherit;box-shadow:inset -7px -10px 12px rgba(100,55,20,.26)}
 </head>
 <body>
 <div class="app">
- <div class="topbar"><div class="brand">BruchFit</div><div class="badge">Version 2.0</div></div>
+ <div class="topbar"><div class="brand">BruchFit</div><div class="badge">Version 3.0</div></div>
 
  <section id="startScreen" class="card start">
   <div class="hero">
@@ -248,14 +259,104 @@ function recognizeImproper(){
 function taskBuild(){
  const d=pick([3,4,5,6,8]),n=rand(1,d-1),type=pick(['blocks','pizza']);
  $('eyebrow').textContent='Bruch darstellen';promptEl.innerHTML=`Stelle ${frac(n,d)} dar.`;
- subEl.textContent=type==='pizza'?`Wähle ${n} von ${d} deutlich getrennten Pizzastücken.`:`Wähle ${n} von insgesamt ${d} Blöcken.`;
- if(type==='blocks') buildBlocks(d); else buildPie(d);
- const c=document.createElement('button');c.className='primary confirm';c.textContent='Prüfen';c.onclick=()=>done(selected.size===n,`Richtig sind ${n} von ${d} Teilen.`);stage.appendChild(c)
+
+ if(type==='blocks'){
+   subEl.textContent='1. Stelle zuerst den Nenner ein. 2. Markiere danach den Zähler.';
+   buildBlocksInteractive(n,d);
+ }else{
+   subEl.textContent=`Wähle ${n} von ${d} deutlich getrennten Pizzastücken.`;
+   buildPie(d);
+   const c=document.createElement('button');c.className='primary confirm';c.textContent='Prüfen';
+   c.onclick=()=>done(selected.size===n,`Richtig sind ${n} von ${d} Teilen.`);
+   stage.appendChild(c);
+ }
 }
-function buildBlocks(d){
- const row=document.createElement('div');row.className='blockRow';
- for(let i=0;i<d;i++){const b=document.createElement('button');b.className='block';b.onclick=()=>{if(locked)return;selected.has(i)?selected.delete(i):selected.add(i);b.classList.toggle('selected',selected.has(i))};row.appendChild(b)}
- stage.appendChild(row)
+
+function buildBlocksInteractive(n,d){
+ let chosenDen=2;
+
+ const wrap=document.createElement('div');
+ wrap.className='denBuilder';
+
+ const title=document.createElement('div');
+ title.className='denTitle';
+ title.textContent='Wie viele gleich große Teile hat das Ganze?';
+
+ const controls=document.createElement('div');
+ controls.className='denControls';
+
+ const minus=document.createElement('button');
+ minus.className='denBtn';
+ minus.textContent='−';
+
+ const value=document.createElement('div');
+ value.className='denValue';
+ value.textContent=chosenDen;
+
+ const plus=document.createElement('button');
+ plus.className='denBtn';
+ plus.textContent='+';
+
+ const hint=document.createElement('div');
+ hint.className='denHint';
+ hint.textContent='Diese Zahl ist der Nenner. Erzeuge danach genau so viele Blöcke.';
+
+ const create=document.createElement('button');
+ create.className='primary confirm';
+ create.textContent='Blöcke erstellen';
+
+ const update=()=>value.textContent=chosenDen;
+ minus.onclick=()=>{if(chosenDen>2){chosenDen--;update()}};
+ plus.onclick=()=>{if(chosenDen<10){chosenDen++;update()}};
+
+ controls.append(minus,value,plus);
+ wrap.append(title,controls,hint,create);
+ stage.appendChild(wrap);
+
+ create.onclick=()=>{
+   if(locked)return;
+
+   if(chosenDen!==d){
+     feedback.className='feedback bad';
+     feedback.innerHTML=`<span>✗ Der Nenner von ${n}/${d} ist ${d}. Stelle also ${d} Blöcke ein.</span>`;
+     return;
+   }
+
+   feedback.className='feedback hidden';
+   feedback.innerHTML='';
+   stage.innerHTML='';
+   selected.clear();
+
+   const taskWrap=document.createElement('div');
+   taskWrap.className='blockTaskWrap';
+
+   const counter=document.createElement('div');
+   counter.className='blockCounter';
+   counter.innerHTML=`Nenner richtig: <strong>${d}</strong> Blöcke. Markiere jetzt den Zähler <strong>${n}</strong>.`;
+
+   const row=document.createElement('div');
+   row.className='blockRow';
+
+   for(let i=0;i<d;i++){
+     const b=document.createElement('button');
+     b.className='block';
+     b.onclick=()=>{
+       if(locked)return;
+       selected.has(i)?selected.delete(i):selected.add(i);
+       b.classList.toggle('selected',selected.has(i));
+       counter.innerHTML=`Nenner: <strong>${d}</strong> &nbsp; • &nbsp; markiert: <strong>${selected.size}</strong> / gesucht: <strong>${n}</strong>`;
+     };
+     row.appendChild(b);
+   }
+
+   const check=document.createElement('button');
+   check.className='primary confirm';
+   check.textContent='Prüfen';
+   check.onclick=()=>done(selected.size===n,`Richtig: Nenner ${d}, Zähler ${n}.`);
+
+   taskWrap.append(counter,row,check);
+   stage.appendChild(taskWrap);
+ };
 }
 function buildPie(d){
  const p=document.createElement('div');p.className='pie';const angle=360/d;
