@@ -110,7 +110,13 @@ clip-path:inherit;box-shadow:inset -7px -10px 12px rgba(100,55,20,.26)}
 }
 .pie .slice.selected{filter:drop-shadow(0 0 8px rgba(76,215,255,.95))}
 .pieCenter{position:absolute;inset:47.5%;border-radius:50%;background:#0d1724;z-index:4}
-.multiVisual{display:flex;gap:13px;justify-content:center;align-items:center;flex-wrap:wrap}
+.multiVisual{display:flex;gap:18px;justify-content:center;align-items:center;flex-wrap:wrap}
+.improperWrap{display:grid;gap:14px;justify-items:center}
+.improperRow{display:flex;gap:18px;justify-content:center;align-items:center;flex-wrap:wrap}
+.improperUnit{display:grid;justify-items:center;gap:8px}
+.improperLabel{font-size:18px;font-weight:900;color:var(--text)}
+.improperPlus{font-size:36px;font-weight:950;color:var(--muted)}
+.improperExplain{font-size:15px;color:var(--muted);font-weight:800;text-align:center}
 .smallPie{width:120px;height:120px;border-radius:50%;position:relative;overflow:hidden;background:conic-gradient(#43c9ff 0deg var(--fill),#344354 var(--fill) 360deg);box-shadow:inset 0 0 0 5px rgba(255,255,255,.08),0 10px 18px rgba(0,0,0,.18)}
 .smallPie:after{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(transparent 0deg calc(var(--step) - 2deg),rgba(11,17,29,.94) calc(var(--step) - 2deg) var(--step))}
 .smallPie:before{content:"";position:absolute;inset:43%;background:#0e1825;border-radius:50%;z-index:2}
@@ -133,7 +139,7 @@ clip-path:inherit;box-shadow:inset -7px -10px 12px rgba(100,55,20,.26)}
 </head>
 <body>
 <div class="app">
- <div class="topbar"><div class="brand">BruchFit</div><div class="badge">Version 4.0</div></div>
+ <div class="topbar"><div class="brand">BruchFit</div><div class="badge">Version 5.0</div></div>
 
  <section id="startScreen" class="card start">
   <div class="hero">
@@ -256,11 +262,58 @@ function recognizeFractionToVisual(){
  stage.appendChild(wrap)
 }
 function recognizeImproper(){
- const d=pick([3,4,5,6]),whole=1,rest=rand(1,d-1),n=d+rest;
- promptEl.textContent='Welcher Bruch ist dargestellt?';subEl.textContent='Hier ist mehr als ein Ganzes markiert.';
- const g=document.createElement('div');g.className='multiVisual';g.innerHTML=smallPieHTML(d,d)+smallPieHTML(rest,d);stage.appendChild(g);
- const opts=[{n,d,ok:true},{n:rest,d,ok:false},{n:whole+rest,d,ok:false},{n:d,d:rest,ok:false}].sort(()=>Math.random()-.5);
- opts.forEach(o=>{const b=document.createElement('button');b.className='answer';b.innerHTML=frac(o.n,o.d);b.onclick=()=>done(o.ok,`Ein Ganzes sind ${d}/${d}, plus ${rest}/${d} ergibt ${n}/${d}.`);answers.appendChild(b)})
+ const d=pick([3,4,5,6]),rest=rand(1,d-1),n=d+rest;
+ promptEl.textContent='Welcher unechte Bruch ist dargestellt?';
+ subEl.textContent='Beide Kreise sind gleich groß und jeweils in gleich viele Teile geteilt. Addiere die markierten Teile.';
+
+ const wrap=document.createElement('div');
+ wrap.className='improperWrap';
+
+ const row=document.createElement('div');
+ row.className='improperRow';
+
+ const left=document.createElement('div');
+ left.className='improperUnit';
+ left.innerHTML=smallPieHTML(d,d)+`<div class="improperLabel">${d}/${d}</div>`;
+
+ const plus=document.createElement('div');
+ plus.className='improperPlus';
+ plus.textContent='+';
+
+ const right=document.createElement('div');
+ right.className='improperUnit';
+ right.innerHTML=smallPieHTML(rest,d)+`<div class="improperLabel">${rest}/${d}</div>`;
+
+ row.append(left,plus,right);
+
+ const explain=document.createElement('div');
+ explain.className='improperExplain';
+ explain.textContent='Die Teile behalten denselben Nenner, weil beide Ganzen gleich aufgeteilt sind.';
+
+ wrap.append(row,explain);
+ stage.appendChild(wrap);
+
+ const wrong1=simp(rest,d);
+ const wrong2=simp(n,d*2);
+ const opts=[
+   {n:n,d:d,ok:true},
+   {n:wrong1[0],d:wrong1[1],ok:false},
+   {n:wrong2[0],d:wrong2[1],ok:false},
+   {n:d,d:rest,ok:false}
+ ].filter((o,i,a)=>a.findIndex(x=>x.n===o.n&&x.d===o.d)===i).sort(()=>Math.random()-.5);
+
+ while(opts.length<4){
+   const dd=pick([2,3,4,5,6,8]),nn=rand(1,Math.max(1,dd+2));
+   if(!opts.some(o=>o.n===nn&&o.d===dd) && nn/dd!==n/d) opts.push({n:nn,d:dd,ok:false});
+ }
+
+ opts.forEach(o=>{
+   const b=document.createElement('button');
+   b.className='answer';
+   b.innerHTML=frac(o.n,o.d);
+   b.onclick=()=>done(o.ok,`${d}/${d} + ${rest}/${d} = ${n}/${d}.`);
+   answers.appendChild(b);
+ });
 }
 function taskBuild(){
  const d=pick([3,4,5,6,8]),n=rand(1,d-1),type=pick(['blocks','pizza']);
