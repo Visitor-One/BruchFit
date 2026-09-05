@@ -130,6 +130,47 @@ clip-path:inherit;box-shadow:inset -7px -10px 12px rgba(100,55,20,.26)}
 .learnCard h3{margin:0 0 8px;font-size:21px}.learnCard p{margin:0;color:var(--muted);line-height:1.5}
 .learnExample{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:14px;font-size:28px;font-weight:900;flex-wrap:wrap}
 .learnNav{display:flex;gap:10px;margin-top:14px}.learnNav button{flex:1}
+
+.denLearn{width:100%;display:grid;gap:20px}
+.denIntro{max-width:760px;color:var(--muted);line-height:1.5}
+.fractionEditors{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center;width:100%}
+.frEditor{display:grid;gap:12px;justify-items:center;padding:16px;border-radius:20px;background:rgba(255,255,255,.045);min-width:0}
+.frEditorTitle{font-size:13px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.06em}
+.frPizza{width:min(230px,34vw);aspect-ratio:1}
+.frPizza svg{width:100%;height:100%;display:block;filter:drop-shadow(0 12px 18px rgba(0,0,0,.2))}
+.frPizza path{stroke:#0d1724;stroke-width:2.5;cursor:pointer;transition:.15s}
+.frPizza path.off{fill:#344354}
+.frPizza path.on{fill:#43c9ff}
+.frPizza path:hover{filter:brightness(1.08)}
+.frLive{font-size:30px;font-weight:950}
+.frSliderWrap{width:min(270px,100%);display:grid;gap:5px}
+.frSlider{width:100%;height:38px;appearance:none;-webkit-appearance:none;background:transparent}
+.frSlider::-webkit-slider-runnable-track{height:9px;border-radius:999px;background:#2b3a4e}
+.frSlider::-webkit-slider-thumb{-webkit-appearance:none;width:29px;height:29px;border-radius:50%;margin-top:-10px;background:#f2f7fb;border:4px solid #213247;box-shadow:0 4px 10px rgba(0,0,0,.3)}
+.frSliderScale{display:flex;justify-content:space-between;font-size:11px;color:#718398}
+.bigPlus{font-size:42px;font-weight:950;color:var(--muted)}
+.liveEquation{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:34px;font-weight:950;padding:10px}
+.denActions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.commonPanel{display:grid;gap:14px;padding:18px;border-radius:20px;background:rgba(66,191,245,.07);box-shadow:inset 0 0 0 1px rgba(66,191,245,.15)}
+.commonTitle{font-size:20px;font-weight:950;text-align:center}
+.commonText{color:var(--muted);line-height:1.5;text-align:center}
+.converted{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:12px;align-items:center;justify-items:center}
+.convertBox{display:grid;gap:8px;justify-items:center}
+.convertPizza{width:150px;aspect-ratio:1}
+.convertPizza svg{width:100%;height:100%;display:block}
+.convertPizza path{stroke:#0d1724;stroke-width:2;fill:#344354}
+.convertPizza path.on{fill:#43c9ff}
+.convertFrac{font-size:27px;font-weight:950}
+.arrowEq{font-size:28px;color:var(--muted);font-weight:900}
+.parentTip{padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.045);color:var(--muted);line-height:1.5}
+.parentTip b{color:var(--text)}
+@media(max-width:700px){
+ .fractionEditors{grid-template-columns:1fr}
+ .bigPlus{font-size:32px}
+ .frPizza{width:min(230px,65vw)}
+ .converted{grid-template-columns:1fr;gap:8px}
+ .arrowEq{transform:rotate(90deg)}
+}
 .result{padding:26px;text-align:center}.result h2{font-size:42px;margin:0 0 8px}.result p{color:var(--muted)}
 .bigScore{font-size:70px;font-weight:950;color:var(--gold);letter-spacing:-.06em}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
@@ -144,7 +185,7 @@ clip-path:inherit;box-shadow:inset -7px -10px 12px rgba(100,55,20,.26)}
 </head>
 <body>
 <div class="app">
- <div class="topbar"><div class="brand">BruchFit</div><div class="badge">Version 7.0</div></div>
+ <div class="topbar"><div class="brand">BruchFit</div><div class="badge">Version 8.0</div></div>
 
  <section id="startScreen" class="card start">
   <div class="hero">
@@ -154,6 +195,7 @@ clip-path:inherit;box-shadow:inset -7px -10px 12px rgba(100,55,20,.26)}
     <div class="sectionTitle">Bereich auswählen</div>
     <div class="modeGrid">
       <button class="mode learnMode" data-mode="learn"><b>📘 Lernbereich</b><small>Zähler, Nenner, gleichnamig machen und Rechenwege verstehen</small></button>
+      <button class="mode learnMode" data-mode="denlearn"><b>🍕 Gemeinsamer Nenner</b><small>Interaktiver Eltern-Lernbereich mit zwei Pizzen und direkter Umteilung</small></button>
       <button class="mode active" data-mode="mix"><b>🎯 Gemischtes Training</b><small>Erkennen, darstellen und rechnen durcheinander</small></button>
       <button class="mode" data-mode="recognize"><b>🔎 Brüche erkennen</b><small>Auch schwierigere Darstellungen und unechte Brüche</small></button>
       <button class="mode" data-mode="build"><b>🧱 Brüche bauen</b><small>Pizza- oder Blockteile gezielt auswählen</small></button>
@@ -208,12 +250,23 @@ const lcm=(a,b)=>Math.abs(a*b)/gcd(a,b);
 document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{
  document.querySelectorAll('.mode').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.mode;
 });
-$('startBtn').onclick=()=>{start.classList.add('hidden');game.classList.remove('hidden');result.classList.add('hidden');idx=score=correct=wrong=0;lesson=0; mode==='learn'?showLesson():nextTask()};
+$('startBtn').onclick=()=>{start.classList.add('hidden');game.classList.remove('hidden');result.classList.add('hidden');idx=score=correct=wrong=0;lesson=0; if(mode==='learn')showLesson(); else if(mode==='denlearn')showDenominatorLab(); else nextTask()};
 $('backBtn').onclick=()=>{game.classList.add('hidden');start.classList.remove('hidden')};
 $('againBtn').onclick=()=>{result.classList.add('hidden');start.classList.remove('hidden')};
 
 function clearTask(){locked=false;selected.clear();stage.innerHTML='';answers.innerHTML='';feedback.className='feedback hidden';feedback.innerHTML=''}
-function setProgress(){ $('progress').style.width=(mode==='learn'?((lesson+1)/4*100):(idx/TOTAL*100))+'%'; $('score').textContent=mode==='learn'?'📘 Lernen':`⭐ ${score}`}
+function setProgress(){
+ if(mode==='learn'){
+   $('progress').style.width=((lesson+1)/4*100)+'%';
+   $('score').textContent='📘 Lernen';
+ }else if(mode==='denlearn'){
+   $('progress').style.width='100%';
+   $('score').textContent='🍕 Erklären';
+ }else{
+   $('progress').style.width=(idx/TOTAL*100)+'%';
+   $('score').textContent=`⭐ ${score}`;
+ }
+}
 function nextTask(){
  if(idx>=TOTAL){finish();return}
  clearTask();setProgress();
@@ -501,6 +554,237 @@ function taskCalc(){
 }
 function barHTML(n,d){let p='';for(let i=0;i<d;i++)p+=`<div class="barPart ${i<n?'filled':''}"></div>`;return `<div class="bar">${p}</div>`}
 function smallPieHTML(n,d){const step=360/d,fill=360*n/d;return `<div class="smallPie" style="--step:${step}deg;--fill:${fill}deg"></div>`}
+
+
+function showDenominatorLab(){
+ clearTask();
+ setProgress();
+ $('eyebrow').textContent='Gemeinsamer Nenner';
+ promptEl.textContent='Brüche auf dieselbe Stückgröße bringen';
+ subEl.textContent='Verändere die Teilung der beiden Pizzen und markiere Stücke. Die Brüche werden sofort angezeigt.';
+
+ const lab=document.createElement('div');
+ lab.className='denLearn';
+
+ const intro=document.createElement('div');
+ intro.className='denIntro';
+ intro.textContent='Zum Addieren müssen beide Pizzen in gleich große Stücke gedacht werden. Der gemeinsame Nenner ist eine Teilung, zu der beide ursprünglichen Aufteilungen passen.';
+
+ const editors=document.createElement('div');
+ editors.className='fractionEditors';
+
+ const plus=document.createElement('div');
+ plus.className='bigPlus';
+ plus.textContent='+';
+
+ const left=createFractionEditor('Erster Bruch',2,1);
+ const right=createFractionEditor('Zweiter Bruch',3,1);
+
+ editors.append(left.el,plus,right.el);
+
+ const equation=document.createElement('div');
+ equation.className='liveEquation';
+
+ const actions=document.createElement('div');
+ actions.className='denActions';
+
+ const commonBtn=document.createElement('button');
+ commonBtn.className='primary';
+ commonBtn.textContent='Gemeinsamen Nenner zeigen';
+
+ const exampleBtn=document.createElement('button');
+ exampleBtn.className='secondary';
+ exampleBtn.textContent='Neue Beispielaufgabe';
+
+ const panel=document.createElement('div');
+ panel.className='commonPanel hidden';
+
+ const tip=document.createElement('div');
+ tip.className='parentTip';
+ tip.innerHTML='<b>So kann man es erklären:</b> „Wir dürfen nur Stücke zusammenzählen, die gleich groß sind. Deshalb teilen wir beide Pizzen so fein, dass beide bisherigen Teilungen darin aufgehen. Die Menge bleibt dabei gleich – nur die Stücke werden kleiner.“';
+
+ actions.append(commonBtn,exampleBtn);
+ lab.append(intro,editors,equation,actions,panel,tip);
+ stage.appendChild(lab);
+
+ function updateEquation(){
+   equation.innerHTML=`${frac(left.getNum(),left.getDen())} <span>+</span> ${frac(right.getNum(),right.getDen())}`;
+   panel.classList.add('hidden');
+ }
+ left.onChange(updateEquation);
+ right.onChange(updateEquation);
+ updateEquation();
+
+ commonBtn.onclick=()=>{
+   const a=left.getNum(), b=left.getDen(), c=right.getNum(), d=right.getDen();
+   const common=lcm(b,d);
+   const aa=a*(common/b);
+   const cc=c*(common/d);
+   const total=aa+cc;
+   const reduced=simp(total,common);
+
+   panel.classList.remove('hidden');
+   panel.innerHTML='';
+
+   const title=document.createElement('div');
+   title.className='commonTitle';
+   title.textContent=`Gemeinsamer Nenner: ${common}`;
+
+   const text=document.createElement('div');
+   text.className='commonText';
+   text.textContent=`Beide Pizzen werden in ${common} gleich große Stücke gedacht. Der Wert der Brüche ändert sich dabei nicht.`;
+
+   const conv=document.createElement('div');
+   conv.className='converted';
+
+   const box1=document.createElement('div');
+   box1.className='convertBox';
+   box1.innerHTML=`<div class="convertPizza">${svgPieHTML(aa,common,false)}</div><div class="convertFrac">${a}/${b} = ${aa}/${common}</div>`;
+
+   const p=document.createElement('div');
+   p.className='arrowEq';
+   p.textContent='+';
+
+   const box2=document.createElement('div');
+   box2.className='convertBox';
+   box2.innerHTML=`<div class="convertPizza">${svgPieHTML(cc,common,false)}</div><div class="convertFrac">${c}/${d} = ${cc}/${common}</div>`;
+
+   const eq=document.createElement('div');
+   eq.className='arrowEq';
+   eq.textContent='=';
+
+   const resultBox=document.createElement('div');
+   resultBox.className='convertBox';
+   resultBox.innerHTML=`<div class="convertFrac">${aa}/${common} + ${cc}/${common}</div><div class="convertFrac">= ${total}/${common}${(reduced[0]!==total||reduced[1]!==common)?` = ${reduced[0]}/${reduced[1]}`:''}</div>`;
+
+   conv.append(box1,p,box2,eq,resultBox);
+   panel.append(title,text,conv);
+ };
+
+ exampleBtn.onclick=()=>{
+   const examples=[
+     [2,1,3,1],
+     [3,1,4,1],
+     [4,1,6,1],
+     [3,2,4,1],
+     [5,2,3,1],
+     [2,1,5,2]
+   ];
+   const e=pick(examples);
+   left.set(e[0],e[1]);
+   right.set(e[2],e[3]);
+   updateEquation();
+ };
+}
+
+function createFractionEditor(title,initialDen,initialNum){
+ let den=initialDen;
+ let selectedSet=new Set();
+ for(let i=0;i<Math.min(initialNum,den);i++)selectedSet.add(i);
+ let callback=()=>{};
+
+ const el=document.createElement('div');
+ el.className='frEditor';
+
+ const titleEl=document.createElement('div');
+ titleEl.className='frEditorTitle';
+ titleEl.textContent=title;
+
+ const pizza=document.createElement('div');
+ pizza.className='frPizza';
+
+ const live=document.createElement('div');
+ live.className='frLive';
+
+ const sliderWrap=document.createElement('div');
+ sliderWrap.className='frSliderWrap';
+
+ const slider=document.createElement('input');
+ slider.className='frSlider';
+ slider.type='range';
+ slider.min='2';
+ slider.max='8';
+ slider.step='1';
+ slider.value=String(den);
+ slider.setAttribute('aria-label',title+' Teilung');
+
+ const scale=document.createElement('div');
+ scale.className='frSliderScale';
+ scale.innerHTML='<span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>';
+
+ sliderWrap.append(slider,scale);
+ el.append(titleEl,pizza,live,sliderWrap);
+
+ function render(){
+   pizza.innerHTML='';
+   const svgNS='http://www.w3.org/2000/svg';
+   const svg=document.createElementNS(svgNS,'svg');
+   svg.setAttribute('viewBox','0 0 200 200');
+   svg.setAttribute('role','group');
+   svg.setAttribute('aria-label',`${selectedSet.size} von ${den} Stücken markiert`);
+
+   for(let i=0;i<den;i++){
+     const path=document.createElementNS(svgNS,'path');
+     path.setAttribute('d',sectorPath(100,100,92,i*360/den,(i+1)*360/den));
+     path.setAttribute('class',selectedSet.has(i)?'on':'off');
+     path.setAttribute('tabindex','0');
+     path.setAttribute('role','button');
+     path.setAttribute('aria-label',`Stück ${i+1}`);
+     const toggle=()=>{
+       if(selectedSet.has(i))selectedSet.delete(i);else selectedSet.add(i);
+       render();
+       callback();
+     };
+     path.addEventListener('click',toggle);
+     path.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();toggle()}});
+     svg.appendChild(path);
+   }
+   pizza.appendChild(svg);
+   live.innerHTML=frac(selectedSet.size,den);
+ }
+
+ slider.addEventListener('input',()=>{
+   den=Number(slider.value);
+   selectedSet=new Set();
+   render();
+   callback();
+ });
+
+ render();
+
+ return {
+   el,
+   getNum:()=>selectedSet.size,
+   getDen:()=>den,
+   onChange:fn=>{callback=fn},
+   set:(newDen,newNum)=>{
+     den=Math.max(2,Math.min(8,newDen));
+     slider.value=String(den);
+     selectedSet=new Set();
+     for(let i=0;i<Math.min(newNum,den);i++)selectedSet.add(i);
+     render();
+     callback();
+   }
+ };
+}
+
+function sectorPath(cx,cy,r,startDeg,endDeg){
+ const rad=a=>(a-90)*Math.PI/180;
+ const x1=cx+r*Math.cos(rad(startDeg));
+ const y1=cy+r*Math.sin(rad(startDeg));
+ const x2=cx+r*Math.cos(rad(endDeg));
+ const y2=cy+r*Math.sin(rad(endDeg));
+ const large=(endDeg-startDeg)>180?1:0;
+ return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`;
+}
+
+function svgPieHTML(n,d){
+ let paths='';
+ for(let i=0;i<d;i++){
+   paths+=`<path class="${i<n?'on':''}" d="${sectorPath(100,100,92,i*360/d,(i+1)*360/d)}"></path>`;
+ }
+ return `<svg viewBox="0 0 200 200" aria-hidden="true">${paths}</svg>`;
+}
 
 const lessons=[
  {title:'1. Zähler und Nenner',text:'Der Nenner sagt, in wie viele gleich große Teile ein Ganzes geteilt ist. Der Zähler sagt, wie viele dieser Teile gemeint sind.',ex:`${frac(3,4)} <span>=</span> <span>3 von 4 Teilen</span>`},
